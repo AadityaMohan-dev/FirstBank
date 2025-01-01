@@ -6,16 +6,17 @@ import com.aadi.bank.the_first_bank.repository.UserRepository;
 import com.aadi.bank.the_first_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+
 @Service
 public class UserSvcImpl implements UserSvc{
-    @Autowired
-    UserRequest userRequest;
     @Autowired
     UserRepository userRepository;
     @Autowired
     EmailSvc emailSvc;
+
+    @Autowired
+    TrnsSvc trnsSvc;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -114,6 +115,14 @@ public class UserSvcImpl implements UserSvc{
         userToCredit.setAccountBalance(total_balance);
         User savedUser = userRepository.save(userToCredit);
 
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(savedUser.getAccountNumber())
+                .amount(request.getAmount())
+                .transactionType("CREDITED")
+                .status("SUCCESS")
+                .build();
+        trnsSvc.savedTransactions(transactionDto);
+
         EmailDetail emailDetail = EmailDetail.builder()
                 .recipient(savedUser.getEmail())
                 .subject("Amount Credited Successfully.\n")
@@ -178,6 +187,83 @@ public class UserSvcImpl implements UserSvc{
                         .accountNumber(userToDebit.getAccountNumber())
                         .accountName(userToDebit.getFirstName()+ " "+ userToDebit.getLastName()+ " " + userToDebit.getOtherName())
                         .accountBalance(userToDebit.getAccountBalance())
+                        .build())
+                .build();
+    }
+
+    @Override
+    public BankResponse transfer(TransferRequest request) {
+        Boolean isDestinationAccountExists = userRepository.existsByAccountNumber(request.getDestinationAccountNumber());
+        if(!isDestinationAccountExists){
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXISTS_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXISTS_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+        User destinationAccount = userRepository.findByAccountNumber(request.getDestinationAccountNumber());
+
+        User sourceAccountUser = userRepository.findByAccountNumber(request.getSourceAccountNumber());
+        if(request.getAmount().compareTo(sourceAccountUser.getAccountBalance()) < 0){
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.INSUFFICIENT_BALANCE_CODE)
+                    .responseMessage(AccountUtils.INSUFFICIENT_BALANCE_MESSAGE)
+                    .accountInfo(null)
+                    .build();
+        }
+
+
+        sourceAccountUser.setAccountBalance(sourceAccountUser.getAccountBalance().subtract(request.getAmount()));
+        User savedUser = userRepository.save(sourceAccountUser);
+
+        destinationAccount.setAccountBalance(request.getAmount().add(destinationAccount.getAccountBalance()));
+        User saveCRDUser = userRepository.save(destinationAccount);
+
+
+        EmailDetail emailDetail = EmailDetail.builder()
+                .recipient(savedUser.getEmail())
+                .subject("Amount Debited Successfully.\n")
+                .messageBody("Account Name : " + savedUser.getFirstName() + " " + savedUser.getLastName() + " " + savedUser.getOtherName() + "\n" +
+                        "Account number : " + savedUser.getAccountNumber() + "\n" +
+                        "Amount Debited : " + request.getAmount() +
+                        "Sent to : " + sourceAccountUser.getAccountNumber() +
+                        "Remaining Balance : " + savedUser.getAccountBalance() +
+                        "\n Thanks For Choosing Us . . .")
+                .build();
+        emailSvc.sendEmailAlert(emailDetail);
+
+        EmailDetail receiverMail = EmailDetail.builder()
+                .recipient(saveCRDUser.getEmail())
+                .subject("Amount credited Successfully.\n")
+                .messageBody("Account Name : " + saveCRDUser.getFirstName() + " " + saveCRDUser.getLastName() + " " + saveCRDUser.getOtherName() + "\n" +
+                        "Account number : " + saveCRDUser.getAccountNumber() + "\n" +
+                        "Amount credited : " + request.getAmount() +
+                        "Send By : " + sourceAccountUser.getAccountNumber() +
+                        "Remaining Balance : " + saveCRDUser.getAccountBalance() +
+                        "\n Thanks For Choosing Us . . .")
+                .build();
+        emailSvc.sendEmailAlert(receiverMail);
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(saveCRDUser.getAccountNumber())
+                .amount(request.getAmount())
+                .transactionType("CREDITED")
+                .status("SUCCESS")
+                .build();
+        TransactionDto transactionDebitDto = TransactionDto.builder()
+                .accountNumber(savedUser.getAccountNumber())
+                .amount(request.getAmount())
+                .transactionType("DEBITED")
+                .status("SUCCESS")
+                .build();
+        trnsSvc.savedTransactions(transactionDto);
+        trnsSvc.savedTransactions(transactionDto);
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_DEBIT_SUCCESS_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_DEBIT_SUCCESS_MESSAGE + " " + request.getAmount())
+                .accountInfo(AccountInfo.builder()
+                        .accountNumber(sourceAccountUser.getAccountNumber())
+                        .accountName(sourceAccountUser.getFirstName()+ " "+ sourceAccountUser.getLastName()+ " " + sourceAccountUser.getOtherName())
+                        .accountBalance(sourceAccountUser.getAccountBalance())
                         .build())
                 .build();
     }

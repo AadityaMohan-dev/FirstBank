@@ -4,4 +4,5 @@ import com.aadi.bank.the_first_bank.dto.EmailDetail;
 
 public interface EmailSvc {
     void sendEmailAlert(EmailDetail emailDetail);
+    void sendEmailWithAttachment(EmailDetail emailDetail);
 }

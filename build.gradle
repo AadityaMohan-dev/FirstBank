@@ -26,12 +26,20 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.4.0'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.4.0'
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.5'
+	// Runtime Dependencies
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.5'
+
 }
 
 tasks.named('test') {
