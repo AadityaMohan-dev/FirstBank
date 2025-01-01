@@ -9,4 +9,6 @@ public interface UserSvc {
     BankResponse creditAccount(CreditDebitRequest request);
     BankResponse debitAccount(CreditDebitRequest request);
     BankResponse transfer(TransferRequest request);
+
+    BankResponse login(LoginDto loginDto);
 }

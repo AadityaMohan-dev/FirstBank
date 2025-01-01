@@ -22,6 +22,11 @@ public class UserController {
         return userSvc.createAccount(userRequest);
     }
 
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginDto loginDto){
+        return userSvc.login(loginDto);
+    }
+
 
     @Operation(summary = "Balance Enquiry", description = "Given Account Number, check How much the user have")
     @ApiResponse(responseCode = "200", description = "HTTP Status code 200 SUCCESS")

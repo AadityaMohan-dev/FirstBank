@@ -1,10 +1,16 @@
 package com.aadi.bank.the_first_bank.services;
 
+import com.aadi.bank.the_first_bank.config.JwtTokenProvider;
 import com.aadi.bank.the_first_bank.dto.*;
+import com.aadi.bank.the_first_bank.entity.Roles;
 import com.aadi.bank.the_first_bank.entity.User;
 import com.aadi.bank.the_first_bank.repository.UserRepository;
 import com.aadi.bank.the_first_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
@@ -14,9 +20,15 @@ public class UserSvcImpl implements UserSvc{
     UserRepository userRepository;
     @Autowired
     EmailSvc emailSvc;
-
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired
     TrnsSvc trnsSvc;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -37,9 +49,11 @@ public class UserSvcImpl implements UserSvc{
                 .accountNumber(AccountUtils.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .email(userRequest.getEmail())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhoneNumber())
                 .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
                 .status("ACTIVE")
+                .role(Roles.ROLE_USER)
                 .build();
 
         User savedUser = userRepository.save(newUser);
@@ -66,7 +80,22 @@ public class UserSvcImpl implements UserSvc{
                         .build())
                 .build();
     }
-
+    public BankResponse login(LoginDto loginDto){
+        Authentication authentication = null ;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(),loginDto.getPassword())
+        );
+        EmailDetail loginAlert = EmailDetail.builder()
+                .subject("YOU ARE LOGGED IN")
+                .messageBody("You logged into your account ,If you didn't initiate this please contact you bank immediately.")
+                .recipient(loginDto.getEmail())
+                .build();
+        emailSvc.sendEmailAlert(loginAlert);
+        return BankResponse.builder()
+                .responseCode("LOGIN SUCCESS")
+                .responseMessage(jwtTokenProvider.generateToken(authentication))
+                .build();
+    }
     @Override
     public BankResponse bankEnquiry(EnquiryRequest request) {
         Boolean isAccountExists = userRepository.existsByAccountNumber(request.getAccountNumber());
