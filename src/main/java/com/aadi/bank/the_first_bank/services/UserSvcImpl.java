@@ -1,6 +1,6 @@
 package com.aadi.bank.the_first_bank.services;
 
-import com.aadi.bank.the_first_bank.config.JwtTokenProvider;
+//import com.aadi.bank.the_first_bank.config.JwtTokenProvider;
 import com.aadi.bank.the_first_bank.dto.*;
 import com.aadi.bank.the_first_bank.entity.Roles;
 import com.aadi.bank.the_first_bank.entity.User;
@@ -27,8 +27,8 @@ public class UserSvcImpl implements UserSvc{
 
     @Autowired
     AuthenticationManager authenticationManager;
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
+//    @Autowired
+//    JwtTokenProvider jwtTokenProvider;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -93,7 +93,7 @@ public class UserSvcImpl implements UserSvc{
         emailSvc.sendEmailAlert(loginAlert);
         return BankResponse.builder()
                 .responseCode("LOGIN SUCCESS")
-                .responseMessage(jwtTokenProvider.generateToken(authentication))
+//                .responseMessage(jwtTokenProvider.generateToken(authentication))
                 .build();
     }
     @Override

@@ -23,12 +23,12 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)  // AUTO for UUID generation
-    private UUID transactionId;  // Use UUID as the type for the ID
+        private UUID transactionId;  // Use UUID as the type for the ID
 
-    private String transactionType;
-    private BigDecimal amount;
-    private String accountNumber;
-    private String status;
+        private String transactionType;
+        private BigDecimal amount;
+        private String accountNumber;
+        private String status;
     @CreationTimestamp
     private LocalDate createdAt;
     @UpdateTimestamp
