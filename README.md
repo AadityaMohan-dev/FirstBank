@@ -10,7 +10,7 @@ This is a web application backend that provides basic banking functionalities us
 - Balance Inquiry
 
 ## Tech Stack
-- **Backend:** Java, Spring Boot
+- **Backend:** Java, Spring Boot , MySQL
 - **API Testing:** Postman
 - **Version Control:** Git, GitHub
 
@@ -26,24 +26,16 @@ Ensure you have the following installed:
 ### Installation & Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/AadityaMohan-dev/FirstBank/tree/main
    ```
 2. Navigate to the project directory:
    ```bash
-   cd your-repo
+   cd FirstBank
    ```
 3. Build and run the application:
    ```bash
    mvn spring-boot:run
    ```
-
-### API Endpoints
-| Method | Endpoint           | Description          |
-|--------|-------------------|----------------------|
-| GET    | /accounts/{id}    | Get account details |
-| POST   | /accounts         | Create an account   |
-| POST   | /transactions     | Transfer funds      |
-| GET    | /transactions     | Get transaction history |
 
 ## Contributing
 1. Fork the repository
@@ -52,5 +44,3 @@ Ensure you have the following installed:
 4. Push to the branch (`git push origin feature-name`)
 5. Create a Pull Request
 
-## License
-This project is licensed under the MIT License.
